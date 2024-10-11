@@ -23,7 +23,7 @@ public class ServerMonitor {
                     // Ghi nhận log từ client
                     String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
                     System.out.println("[" + timestamp + "] Log nhận từ client: " + logMessage);
-                    System.out.println("\n\n========================================================\n\n");
+                    
                 }
             }
         } catch (IOException e) {

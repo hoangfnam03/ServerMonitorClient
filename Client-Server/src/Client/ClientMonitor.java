@@ -14,6 +14,8 @@ public class ClientMonitor {
 
             // Vòng lặp để liên tục theo dõi các kết nối mạng và tiến trình
             while (true) {
+                
+                // 
                 // 1. Sử dụng lệnh netstat để theo dõi các kết nối mạng hiện tại
                 Process process = Runtime.getRuntime().exec("netstat -an");
                 BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -32,7 +34,10 @@ public class ClientMonitor {
                 if (connections.length() > 0) {
                     out.println("Kết nối mạng đến trang web:\n" + connections.toString());
                 }
-
+                
+                
+                
+                // Sửa phần này thành gửi log khi chuyển cửa sổ, hiện tại đang bị gửi log liên tục (cần thêm điều kiện gì đó để tránh liên tục)
                 // 2. Theo dõi các tiến trình đang chạy (Windows tasklist)
                 process = Runtime.getRuntime().exec("tasklist");
                 input = new BufferedReader(new InputStreamReader(process.getInputStream()));
