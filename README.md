@@ -1,7 +1,7 @@
 
 
 
-# Hệ thống giám sát mạng (Network Monitoring)
+# Hệ thống giám sát hoạt động (Activity Monitoring)
 ---
 
 ## Thành viên
@@ -21,7 +21,7 @@
 
 ---
 ## Giới thiệu
-Dự án này là một **Hệ thống giám sát lưu lượng mạng** được phát triển bằng **Java**. Hệ thống được thiết kế để giám sát, thu thập và phân tích lưu lượng mạng trong thời gian thực. Nó cung cấp các thông tin quan trọng về lưu lượng, như kích thước gói tin, địa chỉ nguồn và đích, cùng các giao thức được sử dụng. Điều này giúp các quản trị viên mạng hiểu rõ hơn về cách sử dụng mạng và nhận diện các vấn đề hoặc bất thường có thể xảy ra.
+Dự án này là một **Hệ thống giám sát hoạt động ** được phát triển bằng **Java**. Hệ thống được thiết kế để giám sát cách hoạt động của máy trạm trong thời gian thực. Nó cung cấp các thông tin quan trọng về những hoạt động của máy trạm bao gồm : thời gian sử dụng , cửa sổ đang mở , thao tác trên cửa số đó cùng các giao thức được sử dụng. Điều này giúp các quản trị viên mạng giám sát được các hoạt động trên máy trạm và nhận diện các vấn đề hoặc bất thường có thể xảy ra. Dự án này được phục vụ trong các kì thi quan trọng trên máy tính để máy chủ có thể giám sát được các máy trạm đang có những hoạt động gì .
 
 ## Tính năng
 - Ping địa chỉ IP, domain
