@@ -1,70 +1,66 @@
-package Client;
-
+package client ;
 import java.io.*;
 import java.net.*;
-import java.util.Scanner;
+import java.nio.file.*;
+import java.util.List;
 
 public class ClientMonitor {
     public static void main(String[] args) {
-        Socket socket = null;  // Định nghĩa socket bên ngoài để đóng sau
+        String serverAddress = "localhost"; // Địa chỉ của server
+        int port = 6789; // Cổng của server
+        
+        try (Socket socket = new Socket(serverAddress, port)) {
+            OutputStream output = socket.getOutputStream();
+            PrintWriter writer = new PrintWriter(output, true);
+            
+            // Giám sát các tiến trình (process)
+            monitorProcesses(writer);
+            
+            // Giám sát hoạt động file trong một thư mục cụ thể
+            monitorFileChanges(writer, Paths.get("C:/path/to/monitor")); // Thay đổi đường dẫn theo nhu cầu
+            
+        } catch (IOException ex) {
+            System.out.println("Client exception: " + ex.getMessage());
+        }
+    }
+
+    // Phương thức giám sát các tiến trình (process)
+    public static void monitorProcesses(PrintWriter writer) {
+        List<ProcessHandle> processes = ProcessHandle.allProcesses().toList();
+
+        for (ProcessHandle process : processes) {
+            process.info().command().ifPresent(command -> {
+                writer.println("Running process: " + command);
+            });
+        }
+    }
+
+    // Phương thức giám sát sự thay đổi file trong thư mục cụ thể
+    public static void monitorFileChanges(PrintWriter writer, Path pathToMonitor) {
         try {
-            // Kết nối tới server giám sát
-            socket = new Socket("localhost", 6000);
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            WatchService watchService = FileSystems.getDefault().newWatchService();
+            pathToMonitor.register(watchService, StandardWatchEventKinds.ENTRY_CREATE,
+                    StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
 
-            // Vòng lặp để liên tục theo dõi các kết nối mạng và tiến trình
-            while (true) {
-                
-                // 
-                // 1. Sử dụng lệnh netstat để theo dõi các kết nối mạng hiện tại
-                Process process = Runtime.getRuntime().exec("netstat -an");
-                BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                String line;
-                StringBuilder connections = new StringBuilder();
+            WatchKey key;
 
-                while ((line = input.readLine()) != null) {
-                    // Tìm các kết nối đến cổng 80 (HTTP) hoặc cổng 443 (HTTPS) của các trang web
-                    if (line.contains(":80") || line.contains(":443")) {
-                        connections.append(line).append("\n");
+            while ((key = watchService.take()) != null) {
+                for (WatchEvent<?> event : key.pollEvents()) {
+                    WatchEvent.Kind<?> kind = event.kind();
+                    Path fileName = (Path) event.context();
+
+                    if (kind == StandardWatchEventKinds.ENTRY_CREATE) {
+                        writer.println("File created: " + fileName);
+                    } else if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
+                        writer.println("File deleted: " + fileName);
+                    } else if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+                        writer.println("File modified: " + fileName);
                     }
                 }
-                input.close();
-
-                // Nếu có kết nối mạng đến các trang web, gửi thông tin về server
-                if (connections.length() > 0) {
-                    out.println("Kết nối mạng đến trang web:\n" + connections.toString());
-                }
-                
-                
-                
-                // Sửa phần này thành gửi log khi chuyển cửa sổ, hiện tại đang bị gửi log liên tục (cần thêm điều kiện gì đó để tránh liên tục)
-                // 2. Theo dõi các tiến trình đang chạy (Windows tasklist)
-                process = Runtime.getRuntime().exec("tasklist");
-                input = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                StringBuilder processList = new StringBuilder();
-
-                while ((line = input.readLine()) != null) {
-                    processList.append(line).append("\n");
-                }
-                input.close();
-
-                // Gửi danh sách các tiến trình đang chạy lên server
-                out.println("Các tiến trình đang chạy:\n" + processList.toString());
-
-                // Tạm dừng 10 giây trước khi lấy lại kết nối
-                Thread.sleep(10000); // 10 giây
+                key.reset(); // Reset key để tiếp tục theo dõi
             }
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            // Đảm bảo đóng socket ngay cả khi có lỗi hoặc vòng lặp kết thúc
-            if (socket != null && !socket.isClosed()) {
-                try {
-                    socket.close();  // Đóng kết nối socket sau khi hoàn thành công việc
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            writer.println("Error in file monitoring: " + e.getMessage());
         }
     }
 }
