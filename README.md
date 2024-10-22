@@ -1,7 +1,7 @@
 
 
 
-# Hệ thống giám sát hoạt động (Activity Monitoring)
+# Hệ thống giám sát hoạt động máy trạm
 ---
 
 ## Thành viên
