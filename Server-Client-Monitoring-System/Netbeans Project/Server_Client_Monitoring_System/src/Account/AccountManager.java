@@ -55,4 +55,21 @@ public class AccountManager {
         }
         return false; 
     }
+    
+    public String getNameFromUsername(String username) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
+            String line;
+            reader.readLine(); 
+            while ((line = reader.readLine()) != null) {
+                String[] details = line.split(",");
+                if (details[0].equals(username)) {
+                    return details[2]; 
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null; 
+    }
+
 }

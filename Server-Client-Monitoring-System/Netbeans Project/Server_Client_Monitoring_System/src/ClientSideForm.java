@@ -45,11 +45,10 @@ public class ClientSideForm extends javax.swing.JFrame {
         public void run(){
             try{
                 //s=new Socket(InetAddress.getByName("127.0.0.1"),ClientHome.portNumber,InetAddress.getByName(ip),ClientHome.portNumber);
-                s = new Socket("localhost", ClientHome.portNumber);
+                s = new Socket("localhost", 5001);
                 
                 din=new DataInputStream(s.getInputStream());
                 dout=new DataOutputStream(s.getOutputStream());
-                dout.writeUTF(ClientHome.name);
                 
                 String previousWindowTitle = "";  
        
@@ -70,7 +69,7 @@ public class ClientSideForm extends javax.swing.JFrame {
             }catch(Exception e){
                 JOptionPane.showMessageDialog(null, "Server is not online, Please Try again", "Error in Connection", JOptionPane.ERROR_MESSAGE);
                 c.setVisible(false);
-                new ClientHome().setVisible(true);
+                new Login().setVisible(true);
             }
         }
 
@@ -84,9 +83,9 @@ public class ClientSideForm extends javax.swing.JFrame {
     }
     public void go(){
         this.setVisible(true);
-        ip=ClientHome.ip;
+        //ip=ClientHome.ip;
         publicIp="103.204.166.235";
-        textMainLabel.setText(ClientHome.name);
+        //textMainLabel.setText(ClientHome.name);
         new HandleClient(this).start();
     }
     @SuppressWarnings("unchecked")

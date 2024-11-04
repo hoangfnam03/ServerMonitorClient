@@ -1,5 +1,12 @@
-
+   
 import Account.AccountManager;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 import javax.swing.JOptionPane;
 
 
@@ -209,17 +216,24 @@ public class Login extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
         String username = jTextField1.getText();
-        String password = new String(jPasswordField1.getPassword()); 
+        String password = new String(jPasswordField1.getPassword());
 
-        AccountManager accountManager = new AccountManager();
+        try (Socket socket = new Socket("localhost", 5001); DataOutputStream dout = new DataOutputStream(socket.getOutputStream()); DataInputStream din = new DataInputStream(socket.getInputStream())) {
+            dout.writeUTF(username);
+            dout.writeUTF(password);
 
-        if (accountManager.checkCredentials(username, password)) {
-            this.setVisible(false);
-            new ClientHome().setVisible(true);
-        } else {
-            JOptionPane.showMessageDialog(this, "Sai tài khoản hoặc mật khẩu!");
+            String response = din.readUTF();
+            System.out.println(response);
+            if ("FAILURE".equals(response)) {
+                JOptionPane.showMessageDialog(this, "Sai tài khoản hoặc mật khẩu!");
+            } else {
+                this.setVisible(false);
+                new ClientSideForm().go();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Lỗi kết nối tới server!");
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 
