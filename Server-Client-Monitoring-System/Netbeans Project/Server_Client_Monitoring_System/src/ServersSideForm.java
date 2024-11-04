@@ -1,4 +1,5 @@
 
+import Account.AccountManager;
 import java.io.*;
 import java.net.*;
 import java.awt.*;
@@ -10,18 +11,8 @@ import javax.swing.JOptionPane;
 import java.sql.*;
 import java.util.Calendar;
 import java.util.Properties;
-//import javax.mail.Message;
-//import javax.mail.MessagingException;
-//import javax.mail.Session;
-//import javax.mail.Transport;
-//import javax.mail.internet.InternetAddress;
-//import javax.mail.internet.MimeMessage;
 import jdk.internal.net.http.websocket.Transport;
 public class ServersSideForm extends javax.swing.JFrame {
-
-    /**
-     * Creates new form ServersSideForm
-     */
     
     ServerSocket ss;
     Socket s;
@@ -36,6 +27,44 @@ public class ServersSideForm extends javax.swing.JFrame {
      
    
     public class HandleServer extends Thread{
+        
+        public void run(){
+            String str;
+            try{            
+                    ss=new ServerSocket(Home.portNumber);
+                    while(true){
+                        s=ss.accept();
+                        dinMain=new DataInputStream(s.getInputStream());
+                        doutMain= new DataOutputStream(s.getOutputStream());
+                        
+                        String username = dinMain.readUTF();
+                        String password = dinMain.readUTF();
+                        
+                        AccountManager accountManager = new AccountManager();
+                        if (accountManager.checkCredentials(username, password)) {
+                            doutMain.writeUTF("SUCCESS");
+                            textStatus.setText(textStatus.getText() + "\n<" + username + " Connected >");
+
+                            new StartSending(username, doutMain, dinMain).start();
+                            new StartReceiving(username, doutMain, dinMain).start();
+                        } else {
+                            doutMain.writeUTF("FAILURE");
+                            s.close();
+                        }
+                    }
+            }
+            catch(Exception e){
+                try{
+                    JOptionPane.showMessageDialog(null, "Could Not Establish server");
+                    ServerHome h=new ServerHome();
+                    new ServersSideForm().setVisible(false);
+                    h.setVisible(true);
+                }catch(Exception e2){
+
+                }
+            }
+        }
+        
         public class StartSending extends Thread{
             public String name;
             public DataOutputStream dout;
@@ -93,41 +122,13 @@ public class ServersSideForm extends javax.swing.JFrame {
                 }
             }
         }
-        
-        
-        public void run(){
-            String str;
-            try{            
-                    ss=new ServerSocket(Home.portNumber);
-                    while(true){
-                        s=ss.accept();
-                        dinMain=new DataInputStream(s.getInputStream());
-                        doutMain= new DataOutputStream(s.getOutputStream());
-                        str=dinMain.readUTF();
-                        textStatus.setText(textStatus.getText()+"\n<"+str+" Connected >");
-                        new StartSending(str,doutMain,dinMain).start();
-                        new StartReceiving(str,doutMain,dinMain).start();
-                        
-                    }
-            }
-            catch(Exception e){
-                try{
-                    JOptionPane.showMessageDialog(null, "Could Not Establish server");
-                    ServerHome h=new ServerHome();
-                    new ServersSideForm().setVisible(false);
-                    h.setVisible(true);
-                }catch(Exception e2){
-
-                }
-            }
-        }
     }
     
     public void go(){
         this.setVisible(true);
         textStatus.setText("<Server Started>");
         new HandleServer().start();
-        }
+    }
    
     /**
      * This method is called from within the constructor to initialize the form.
@@ -356,55 +357,9 @@ public class ServersSideForm extends javax.swing.JFrame {
     }                                        
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {                                         
-//        // TODO add your handling code here:
-//        
-//        textStatus2.setForeground(Color.green);
-//        textStatus2.setText("...Sending mail this may take few seconds");
-//        String to=JOptionPane.showInputDialog("Enter Email Id : ");
-//        String content=msg_area.getText();              //change accordingly 
-//        //Get the session object  
-//        Properties props = new Properties();  
-//        props.put("mail.smtp.host", "smtp.gmail.com");  
-//        props.put("mail.smtp.socketFactory.port", "465");  
-//        props.put("mail.smtp.socketFactory.class",  
-//                  "javax.net.ssl.SSLSocketFactory");  
-//        props.put("mail.smtp.auth", "true");  
-//        props.put("mail.smtp.port", "465");  
-//
-//         
-//        Session session = Session.getDefaultInstance(props,  
-//         new javax.mail.Authenticator() {  
-//         protected javax.mail.PasswordAuthentication getPasswordAuthentication() {  
-//         return new javax.mail.PasswordAuthentication("clientservermonitoringsystem@gmail.com","csmscsms");//change accordingly  
-//         }  
-//        });
-//        
-//        //compose message  
-//        try {  
-//            MimeMessage message = new MimeMessage(session);  
-//            message.setFrom(new InternetAddress("clientservermonitoringsystem@gmail.com"));//change accordingly  
-//            message.addRecipient(Message.RecipientType.TO,new InternetAddress(to));  
-//            message.setSubject("Server Client Monitoring System mail");  
-//            message.setText(content);  
-//
-//            //send message  
-//            Transport.send(message);  
-//            textStatus2.setText("...Mail Sent Successfully");
-//            JOptionPane.showMessageDialog(null, "Mail sent successfully"); 
-//            textStatus.setText(textStatus.getText().trim()+"\n<Mail Sent to "+to+">");
-//
-//        } catch (MessagingException e) {
-//            textStatus2.setForeground(Color.red);
-//            textStatus2.setText("...unsuccessful ");
-//            JOptionPane.showMessageDialog(null, "Couldnt send mail, check for connections or enter valid email id");
-//            throw new RuntimeException(e);
-//        }  
-// 
+
     }                                        
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -437,8 +392,7 @@ public class ServersSideForm extends javax.swing.JFrame {
         });
         
     }
-
-    // Variables declaration - do not modify                     
+                   
     javax.swing.JSlider fontSlider;
     javax.swing.JButton jButton1;
     javax.swing.JButton jButton2;
@@ -452,6 +406,5 @@ public class ServersSideForm extends javax.swing.JFrame {
     javax.swing.JTextArea msg_area;
     javax.swing.JButton msg_exit;
     javax.swing.JTextArea textStatus;
-    javax.swing.JLabel textStatus2;
-    // End of variables declaration                   
+    javax.swing.JLabel textStatus2;                 
 }
