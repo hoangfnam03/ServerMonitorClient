@@ -119,7 +119,7 @@ public class ServerMonitoringUI extends JFrame {
             new Thread(new ClientHandler()).start();
 
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Could not start server on port 5001", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Không thể start server tại cổng 5001", "Error", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
     }
@@ -137,51 +137,95 @@ public class ServerMonitoringUI extends JFrame {
             btnStopServer.setEnabled(false);
 
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Could not stop the server", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Không thể dừng lại server", "Error", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
     }
 
     // Lớp xử lý client
     private class ClientHandler implements Runnable {
+
         @Override
         public void run() {
             while (isServerRunning) {
                 try {
                     Socket clientSocket = serverSocket.accept();
-                    textAreaLog.append("Client connected: " + clientSocket.getInetAddress() + "\n");
+                    textAreaLog.append("Người dùng đã kết nối: " + clientSocket.getInetAddress() + "\n");
 
                     DataInputStream din = new DataInputStream(clientSocket.getInputStream());
                     DataOutputStream dout = new DataOutputStream(clientSocket.getOutputStream());
 
-                    // Nhận thông tin tài khoản từ client
-                    String username = din.readUTF();
-                    String password = din.readUTF();
+                    // Nhận loại yêu cầu từ client ("SIGNUP" hoặc "LOGIN")
+                    String requestType = din.readUTF();
 
-                    AccountManager accountManager = new AccountManager();
-                    if (accountManager.checkCredentials(username, password)) {
-                        String name = accountManager.getNameFromUsername(username);
-                        dout.writeUTF(name);
-                        textAreaLog.append(name + " authenticated and connected.\n");
-
-                        // Khởi động hai luồng nhận và gửi cho client
-                        //new StartSending(name, dout).start();
-                        new StartReceiving(name, din).start();
+                    if ("SIGNUP".equals(requestType)) {
+                        handleSignup(din, dout);
+                    } else if ("LOGIN".equals(requestType)) {
+                        handleLogin(din, dout, clientSocket);
                     } else {
-                        dout.writeUTF("FAILURE");
+                        textAreaLog.append("Yêu cầu không hợp lệ từ client.\n");
+                        dout.writeUTF("INVALID_REQUEST");
                         clientSocket.close();
-                        textAreaLog.append("Authentication failed for " + username + ".\n");
                     }
 
                 } catch (IOException e) {
                     if (isServerRunning) {
-                        textAreaLog.append("Error handling client connection.\n");
+                        textAreaLog.append("Lỗi kết nối tới client.\n");
                         e.printStackTrace();
                     }
                 }
             }
         }
+
+        private void handleSignup(DataInputStream din, DataOutputStream dout) {
+            try {
+                // Nhận thông tin đăng ký từ client
+                String username = din.readUTF();
+                String password = din.readUTF();
+                String name = din.readUTF();
+
+                AccountManager accountManager = new AccountManager();
+                if (accountManager.isUsernameTaken(username)) {
+                    dout.writeUTF("USERNAME_TAKEN");
+                    textAreaLog.append("Tên tài khoản đã tồn tại: " + username + "\n");
+                } else {
+                    accountManager.addAccount(username, password, name);
+                    dout.writeUTF(name);
+                    textAreaLog.append("Đăng ký thành công: " + username + "\n");
+                }
+            } catch (IOException e) {
+                textAreaLog.append("Lỗi xử lý đăng ký.\n");
+                e.printStackTrace();
+            }
+        }
+
+        private void handleLogin(DataInputStream din, DataOutputStream dout, Socket clientSocket) {
+            try {
+                // Nhận thông tin đăng nhập từ client
+                String username = din.readUTF();
+                String password = din.readUTF();
+
+                AccountManager accountManager = new AccountManager();
+                if (accountManager.checkCredentials(username, password)) {
+                    String name = accountManager.getNameFromUsername(username);
+                    dout.writeUTF(name);
+                    textAreaLog.append(name + " đã đăng nhập thành công.\n");
+
+                    // Khởi động luồng nhận/gửi tin nhắn cho client
+                    new StartReceiving(name, din).start();
+                    new StartSending(name, dout).start();
+                } else {
+                    dout.writeUTF("FAILURE");
+                    clientSocket.close();
+                    textAreaLog.append("Đăng nhập thất bại cho tài khoản: " + username + "\n");
+                }
+            } catch (IOException e) {
+                textAreaLog.append("Lỗi xử lý đăng nhập.\n");
+                e.printStackTrace();
+            }
+        }
     }
+
 
     // Lớp gửi dữ liệu cho client
     private class StartSending extends Thread {
@@ -201,12 +245,6 @@ public class ServerMonitoringUI extends JFrame {
                 }
             } catch (IOException | InterruptedException e) {
                 textAreaLog.append("Connection lost with client: " + name + "\n");
-                if(isServerRunning == true){
-                    textAreaLog.append("Server is not running");
-                }
-                else{
-                    textAreaLog.append("Server is still running");
-                }
             }
         }
     }

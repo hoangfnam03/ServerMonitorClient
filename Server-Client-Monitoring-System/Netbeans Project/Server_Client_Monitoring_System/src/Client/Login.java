@@ -224,6 +224,7 @@ public class Login extends javax.swing.JFrame {
         try {
             SocketManager.initializeConnection("localhost", 5001);
             DataOutputStream dout = SocketManager.getOutputStream();
+            dout.writeUTF("LOGIN");
             dout.writeUTF(username);
             dout.writeUTF(password);
             

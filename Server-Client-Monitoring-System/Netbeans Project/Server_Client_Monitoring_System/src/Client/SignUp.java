@@ -3,6 +3,10 @@ package Client;
 
 import Client.Login;
 import Account.AccountManager;
+import Socket.SocketManager;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import javax.swing.JOptionPane;
 
 
@@ -207,13 +211,13 @@ public class SignUp extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 113, Short.MAX_VALUE))
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 126, Short.MAX_VALUE))
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
         pack();
@@ -230,7 +234,7 @@ public class SignUp extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        String name = jTextField1.getText(); 
+        String name = jTextField1.getText();
         String username = jTextField2.getText();
         String password = new String(jPasswordField1.getPassword());
 
@@ -239,15 +243,31 @@ public class SignUp extends javax.swing.JFrame {
             return;
         }
 
-        AccountManager accountManager = new AccountManager();
+        try {
+            SocketManager.initializeConnection("localhost", 5001);
+            DataOutputStream dout = SocketManager.getOutputStream();
+            // Gửi yêu cầu tạo tài khoản lên server
+            dout.writeUTF("SIGNUP");
+            dout.writeUTF(username);
+            dout.writeUTF(password);
+            dout.writeUTF(name);
 
-        if (accountManager.isUsernameTaken(username)) {
-            JOptionPane.showMessageDialog(this, "Tên tài khoản đã tồn tại, vui lòng chọn tên khác!");
-        } else {
-            accountManager.addAccount(username, password, name);
-            JOptionPane.showMessageDialog(this, "Đăng ký thành công!");
-            this.setVisible(false);
-            new Login().setVisible(true); 
+            // Đọc phản hồi từ server
+            DataInputStream din = SocketManager.getInputStream();
+            String serverResponse = din.readUTF();
+
+            if (name.equals(serverResponse)) {
+                JOptionPane.showMessageDialog(this, "Đăng ký thành công!");
+                this.setVisible(false);
+                new Login().setVisible(true);
+            } else if ("USERNAME_TAKEN".equals(serverResponse)) {
+                JOptionPane.showMessageDialog(this, "Tên tài khoản đã tồn tại, vui lòng chọn tên khác!");
+            } else {
+                JOptionPane.showMessageDialog(this, "Đăng ký thất bại, vui lòng thử lại sau.");
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Lỗi kết nối với server: " + e.getMessage());
+            e.printStackTrace();
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 

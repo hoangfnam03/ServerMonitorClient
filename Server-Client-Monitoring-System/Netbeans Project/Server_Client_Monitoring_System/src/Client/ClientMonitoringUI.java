@@ -49,12 +49,9 @@ public class ClientMonitoringUI extends JFrame {
         userInfoLabel = new JLabel("Người dùng: " + name);
         connectionStatusLabel = new JLabel("Trạng thái: Đã kết nối");
 
-        reconnectButton = createStyledButton("Kết nối lại");
-
         infoPanel.add(userInfoLabel);
         infoPanel.add(connectionStatusLabel);
         infoPanel.add(new JLabel()); // Placeholder
-        infoPanel.add(reconnectButton);
 
         add(infoPanel, BorderLayout.NORTH);
 
@@ -72,14 +69,6 @@ public class ClientMonitoringUI extends JFrame {
         controlPanel.add(exitButton);
 
         add(controlPanel, BorderLayout.SOUTH);
-
-        // Xử lý sự kiện
-        reconnectButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                reconnect();
-            }
-        });
-
         logoutButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 logout();
@@ -197,7 +186,41 @@ public class ClientMonitoringUI extends JFrame {
     private void logout() {
         appendNotification("Đã đăng xuất.");
         userInfoLabel.setText("Người dùng: Chưa đăng nhập");
+
+        // Đóng kết nối socket và luồng vào/ra
+        try {
+            if (dout != null) {
+                dout.close();
+            }
+            if (din != null) {
+                din.close();
+            }
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+            }
+            appendNotification("Đã ngắt kết nối với server.");
+        } catch (IOException e) {
+            appendWarning("Lỗi khi đóng kết nối: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // Đóng giao diện hiện tại
+        this.dispose();
+
+        // Hiển thị lại giao diện đăng nhập
+        SwingUtilities.invokeLater(() -> {
+            try {
+                Login loginFrame = new Login();
+                loginFrame.setVisible(true);
+                loginFrame.pack();
+                loginFrame.setLocationRelativeTo(null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
+
+
 
     private void appendNotification(String message) {
         notificationsArea.append(message + "\n");
@@ -235,8 +258,6 @@ public class ClientMonitoringUI extends JFrame {
                         // Kiểm tra và gửi dữ liệu
                         try {
                             dout.writeUTF("Time: " + currentTime + " | Window: " + currentWindowTitle);
-                            clientUI.appendNotification("Chuyển cửa sổ: " + currentWindowTitle);
-                            System.out.println("Change window: " + currentWindowTitle);
                         } catch (IOException ex) {
                             clientUI.appendWarning("Mất kết nối tới server, thử kết nối lại...");
                             //reconnect();  đang làm kết nối lại khi mất kết nối tuy nhiên chưa xử lý tại server
