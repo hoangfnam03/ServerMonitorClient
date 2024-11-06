@@ -21,22 +21,20 @@
 
 ---
 ## Giới thiệu
-Dự án này là một **Hệ thống giám sát hoạt động ** được phát triển bằng **Java**. Hệ thống được thiết kế để giám sát cách hoạt động của máy trạm trong thời gian thực. Nó cung cấp các thông tin quan trọng về những hoạt động của máy trạm bao gồm : thời gian sử dụng , cửa sổ đang mở , thao tác trên cửa số đó cùng các giao thức được sử dụng. Điều này giúp các quản trị viên mạng giám sát được các hoạt động trên máy trạm và nhận diện các vấn đề hoặc bất thường có thể xảy ra. Dự án này được phục vụ trong các kì thi quan trọng trên máy tính để máy chủ có thể giám sát được các máy trạm đang có những hoạt động gì .
+Dự án này là một **Hệ thống giám sát hoạt động** được phát triển bằng **Java**. Hệ thống được thiết kế để giám sát cách hoạt động của máy trạm trong thời gian thực. Nó cung cấp các thông tin quan trọng về những hoạt động của máy trạm bao gồm : thời gian sử dụng , cửa sổ đang mở. Điều này giúp các quản trị viên mạng giám sát được các hoạt động trên máy trạm và nhận diện các vấn đề hoặc bất thường có thể xảy ra. Dự án này được phục vụ trong các kì thi quan trọng trên máy tính để máy chủ có thể giám sát được các máy trạm đang có những hoạt động gì .
 
 ## Tính năng
-- Gíam sát hoạt động trên máy khách
-- Theo dõi từng hoạt động và thời gian sử dung
-- Ping địa chỉ IP, domain
-- Kiểm tra port
+- Giám sát hoạt động trên máy trạm 
+- Theo dõi từng hoạt động và thời gian chuyển đổi
+- Hỗ trợ đăng ký tài khoản, xác thực người dùng
 
 ## Công nghệ sử dụng
 - **Ngôn ngữ chính:** Java
 - **Thư viện dùng thêm:** JNA ,JNA PLATFORM
-- **Giao diện đồ họa:** Swing (hoặc JavaFX nếu cần thiết)
-- **Thao tác mạng:** Sockets API, InetAddress (Ping), TCP/UDP port scanning
-- **Xử lý đa luồng:** Sử dụng multithreading nếu cần thực hiện nhiều thao tác đồng thời
-- **Quản lý dự án và dependency:** Maven hoặc Gradle (nếu cần)
-- **Kiểm thử**: JUnit (nếu cần kiểm thử tự động)
+- **Giao diện đồ họa:** Swing 
+- **Thao tác mạng:** TCP 
+- **Xử lý đa luồng:** Sử dụng multithreading 
+
 
 ## Hướng dẫn cài đặt
 - Hướng dẫn cài đặt thư viên JNA:
@@ -48,11 +46,26 @@ Dự án này là một **Hệ thống giám sát hoạt động ** được ph�
   + Trong NetBeans, nhấp chuột phải vào Libraries của dự án, chọn Add JAR/Folder..., sau đó chọn cả file jna-5.14.0.jar.
   + Nhấn Open để thêm chúng vào dự án.
 - Hướng dẫn cài đặt thư viên JNA-platform-5.14.0.jar ( Tương tự các bước như JNA)
+
+
 ## Cách sử dụng
-- Khởi chạy hệ thống
-- Chạy Server để lấy IP và Port
-- Chạy Client , nhập đúng IP và Port của Server để kết nối
-- Sau khi giao diện hiển thị đã kết nối thành công , client sẽ giám sát các hoạt động và gửi thông báo về cho server
+- Chạy server:
+  + Khởi chạy lớp **ServerMonitoringUI** để mở kết nối trên cổng (mặc định là 5001) và lắng nghe các kết nối từ client.
+![Giao diện server](Asset/startserver.png)
+
+
+
+- Chạy client:
+  + Khởi chạy lớp **LoginAndSignUp** để đăng nhập / đăng ký nếu chưa có tài khoản
+![Giao diện server](Asset/login.png)
+![Giao diện server](Asset/signup.png)
+  + Yêu cầu sẽ được gửi lên Server khi chọn Login / Sign up
+  + Nếu xác thực thành công, giao diện Client sẽ hiển thị
+![Giao diện server](Asset/client.png)
+- Kết nối nhiều client:
+  + Server hỗ trợ nhiều kết nối cùng lúc. 
+  + Mỗi client sẽ mở một kết nối riêng biệt và server sẽ xử lý chúng qua các luồng độc lập.
+![Giao diện server](Asset/servermonitor.png)
 
 ## Các cải tiến trong tương lai
 - Tối ưu hóa Hiệu suất và Sử dụng Tài nguyên: Vì chương trình đang giám sát liên tục, cần có các tối ưu hóa để giảm thiểu việc sử dụng CPU và bộ nhớ trên client. Điều này có thể thực hiện bằng cách điều chỉnh tần suất giám sát hoặc sử dụng các kỹ thuật xử lý sự kiện thay vì kiểm tra liên tục.
