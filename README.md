@@ -4,13 +4,6 @@
 # Hệ thống giám sát hoạt động máy trạm
 ---
 
-## Thành viên
-|  STT  | Họ và tên             | Mã sinh viên |
-| :---: | --------------------- | ------------ |
-|   1   | Nguyễn Hoàng Nam      | B21DCCN095   |
-|   2   | Trần Hoàng Tống Giang | B21DCCN040   |
-|   3   | Nguyễn Văn Hiếu       | B21DCCN366   |
-
 ## Mục lục
 - [Giới thiệu](#giới-thiệu)
 - [Tính năng](#tính-năng)
