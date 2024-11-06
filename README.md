@@ -51,21 +51,21 @@ Dự án này là một **Hệ thống giám sát hoạt động** được phá
 ## Cách sử dụng
 - Chạy server:
   + Khởi chạy lớp **ServerMonitoringUI** để mở kết nối trên cổng (mặc định là 5001) và lắng nghe các kết nối từ client.
-![Giao diện server](Asset/startserver.png)
+![Giao diện server](Server-Client-Monitoring-System/Asset/startserver.png)
 
 
 
 - Chạy client:
   + Khởi chạy lớp **LoginAndSignUp** để đăng nhập / đăng ký nếu chưa có tài khoản
-![Giao diện server](Asset/login.png)
-![Giao diện server](Asset/signup.png)
+![Giao diện server](Server-Client-Monitoring-System/Asset/login.png)
+![Giao diện server](Server-Client-Monitoring-System/Asset/signup.png)
   + Yêu cầu sẽ được gửi lên Server khi chọn Login / Sign up
   + Nếu xác thực thành công, giao diện Client sẽ hiển thị
-![Giao diện server](Asset/client.png)
+![Giao diện server](Server-Client-Monitoring-System/Asset/client.png)
 - Kết nối nhiều client:
   + Server hỗ trợ nhiều kết nối cùng lúc. 
   + Mỗi client sẽ mở một kết nối riêng biệt và server sẽ xử lý chúng qua các luồng độc lập.
-![Giao diện server](Asset/servermonitor.png)
+![Giao diện server](Server-Client-Monitoring-System/Asset/servermonitor.png)
 
 ## Các cải tiến trong tương lai
 - Tối ưu hóa Hiệu suất và Sử dụng Tài nguyên: Vì chương trình đang giám sát liên tục, cần có các tối ưu hóa để giảm thiểu việc sử dụng CPU và bộ nhớ trên client. Điều này có thể thực hiện bằng cách điều chỉnh tần suất giám sát hoặc sử dụng các kỹ thuật xử lý sự kiện thay vì kiểm tra liên tục.
